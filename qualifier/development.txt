@@ -1,0 +1,2 @@
+-r requirements.txt
+-e git+ssh://git@github.com/ansible/ansible.git@f0efe1ecb0c7c0f3966a1950bbc94e792b12d3d2#egg=ansible
