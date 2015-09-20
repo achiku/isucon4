@@ -1,0 +1,31 @@
+---
+- name: update apt if needed
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=36000
+  tags:
+    - provision
+
+- name: install supervisor
+  sudo: yes
+  apt: name=supervisor state=present
+  tags:
+    - provision
+
+- name: set supervisrod.conf
+  sudo: yes
+  file: >
+    src=supervisord.conf
+    path=/etc/supervisor/supervisord.conf
+    owner=root
+    group=root
+    state=file
+  tags:
+    - provision
+
+- name: add supervisor to the system startup
+  sudo: yes
+  service: >
+    name=supervisor
+    enabled=yes
+  tags:
+    - provision

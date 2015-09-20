@@ -1,0 +1,86 @@
+---
+- name: set default version
+  set_fact:
+    version: "2.7.10"
+
+- name: update apt if needed
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=36000
+  tags:
+    - provision
+
+- name: install libs for python
+  sudo: yes
+  apt: name={{ item }} state=present
+  with_items:
+    - libbz2-dev
+    - libreadline-dev
+    - libssl-dev
+    - libsqlite3-dev
+    - libgdbm-dev
+    - zlib1g-dev
+    - tk-dev
+    - tcl-dev
+    - liblzma-dev
+    - libncurses5-dev
+  tags:
+    - provision
+
+- name: download python source
+  command: > 
+      wget https://www.python.org/ftp/python/{{ version }}/Python-{{ version }}.tgz
+      chdir=/tmp
+      creates=/tmp/Python-{{ version }}.tgz
+  tags:
+    - provision
+
+- name: uncompress python source
+  command: >
+      tar xvfz Python-{{ version }}.tgz
+      chdir=/tmp
+      creates=/tmp/Python-{{ version }}
+  tags:
+    - provision
+
+- name: configure
+  command: >
+      ./configure --prefix=/usr/local
+      chdir=/tmp/Python-{{ version }}
+      creates=/tmp/Python-{{ version }}/Makefile
+  tags:
+    - provision
+
+- name: make
+  command: >
+      make
+      chdir=/tmp/Python-{{ version }}
+      creates=/tmp/Python-{{ version }}/python
+  tags:
+    - provision
+
+- name: make install
+  sudo: yes
+  command: >
+      make install
+      chdir=/tmp/Python-{{ version }}
+      creates=/usr/local/bin/python
+  tags:
+    - provision
+
+- name: download get-pip.py
+  command: >
+      wget https://bootstrap.pypa.io/get-pip.py
+      creates=/tmp/get-pip.py
+      chdir=/tmp
+
+- name: install pip
+  sudo: yes
+  command: >
+      /usr/local/bin/python get-pip.py
+      creates=/usr/local/bin/pip
+      chdir=/tmp
+
+- name: install virtualenv
+  sudo: yes
+  command: >
+      pip install virtualenv

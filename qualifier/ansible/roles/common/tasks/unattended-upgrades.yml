@@ -1,0 +1,16 @@
+---
+- name: update apt if needed
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=36000
+
+- name: install unattended-upgrades
+  sudo: yes
+  apt: name=unattended-upgrades state=present
+
+- name: set auto upgrade
+  sudo: yes
+  copy: src=./20auto-upgrades dest=/etc/apt/apt.conf.d/20auto-upgrades
+
+- name: set auto upgrade
+  sudo: yes
+  service: name=unattended-upgrades state=restarted

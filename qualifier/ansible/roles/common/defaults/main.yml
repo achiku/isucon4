@@ -1,0 +1,20 @@
+---
+common_basic_pkgs:
+  - build-essential
+  - unattended-upgrades
+  - pkg-config
+  - curl
+  - vim
+  - git
+  - zip
+  - unzip
+  - tree
+  - sysstat
+  - dstat
+  - ntp
+  - rsync
+  - ssh
+  - tcpdump
+  - telnet
+  - traceroute
+  - sysv-rc-conf

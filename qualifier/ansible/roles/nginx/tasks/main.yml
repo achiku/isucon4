@@ -1,0 +1,88 @@
+---
+- name: add nginx ppa
+  sudo: yes
+  apt_repository: repo='ppa:nginx/stable' update_cache=yes
+
+- name: Install nginx
+  sudo: yes
+  apt: name=nginx state=present update_cache=yes force=yes
+  tags:
+    - provision
+  notify: restart nginx
+
+- name: Create sites-{available,enabled} directory
+  sudo: yes
+  file: >
+    path={{ item }}
+    owner=root
+    group=root
+    state=directory
+  with_items:
+    - "{{ nginx_sites_available_dir }}"
+    - "{{ nginx_sites_enabled_dir }}"
+  tags:
+    - provision
+
+- name: Create nginx.conf
+  sudo: yes
+  template: >
+    src=./etc/nginx/nginx.conf.j2
+    dest={{ nginx_dir }}/nginx.conf
+  notify: restart nginx
+  tags:
+    - provision
+    - deploy
+
+- name: Create nginx config files for {{ nginx_sites }}
+  sudo: yes
+  template: >
+    src=./etc/nginx/sites-available/{{ item }}.conf.j2
+    dest={{ nginx_sites_available_dir }}/{{ item }}.conf
+  with_items: nginx_sites
+  notify: restart nginx
+  tags:
+    - provision
+    - deploy
+
+- name: Find nginx enabled config files
+  sudo: yes
+  shell: ls -1 {{ nginx_sites_enabled_dir }}
+  changed_when: False
+  register: nginx_enabled_config_files
+  tags:
+    - provision
+    - deploy
+
+- name: Clean up nginx enabled config files
+  sudo: yes
+  file: >
+    name={{ nginx_sites_enabled_dir }}/{{ item }}
+    state=absent
+  with_items: nginx_enabled_config_files.stdout_lines
+  tags:
+    - provision
+    - deploy
+
+- name: Create nginx config links for {{ nginx_sites }}
+  sudo: yes
+  file: >
+    src={{ nginx_sites_available_dir }}/{{ item }}.conf
+    dest={{ nginx_sites_enabled_dir }}/{{ item }}.conf
+    state=link
+    owner=root
+    group=root
+  with_items: nginx_sites
+  notify: restart nginx
+  tags:
+    - provision
+    - deploy
+
+- name: Change permission of log directory
+  sudo: yes
+  file: >
+    path={{ nginx_log_dir }}
+    state=directory
+    mode=0755
+  tags:
+    - provision
+    - deploy

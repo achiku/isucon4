@@ -1,0 +1,31 @@
+---
+- name: download luarocks
+  get_url: >
+    url=http://luarocks.org/releases/{{ luarocks }}.tar.gz
+    dest={{ src_path }}/{{ luarocks }}.tar.gz
+
+- name: extract luarocks source code
+  command: > 
+    tar xfz {{ luarocks }}.tar.gz
+    chdir={{ src_path }}
+    creates={{ src_path }}/{{ luarocks }}
+
+- name: configure luarocks
+  command: > 
+    ./configure --prefix={{ luajit_path }} --with-lua={{ luajit_path }} \
+                --with-lua-include={{ luajit_path }}/include/luajit-2.1 \
+                --lua-suffix=jit-2.1.0-alpha
+    chdir={{ src_path }}/{{ luarocks }}
+
+- name: make luarocks
+  command: > 
+    make -j2
+    chdir={{ src_path }}/{{ luarocks }}
+    creates={{ src_path }}/{{ luarocks }}/build
+
+- name: make install luarocks
+  sudo: yes
+  command: > 
+    make install
+    chdir={{ src_path }}/{{ luarocks }}
+    creates={{ luajit_path }}/bin/luarocks

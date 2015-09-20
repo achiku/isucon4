@@ -1,5 +1,5 @@
-import MySQLdb
-from MySQLdb.cursors import DictCursor
+import pymysql
+from pymysql.cursors import DictCursor
 
 from flask import (
     Flask, request, redirect, session, url_for, flash, jsonify,
@@ -31,7 +31,7 @@ def connect_db():
     dbname = os.environ.get('ISU4_DB_NAME', 'isu4_qualifier')
     username = os.environ.get('ISU4_DB_USER', 'root')
     password = os.environ.get('ISU4_DB_PASSWORD', '')
-    db = MySQLdb.connect(host=host, port=port, db=dbname, user=username,
+    db = pymysql.connect(host=host, port=port, db=dbname, user=username,
                          passwd=password, cursorclass=DictCursor, charset='utf8')
     return db
 

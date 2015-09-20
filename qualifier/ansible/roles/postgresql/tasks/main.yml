@@ -1,0 +1,12 @@
+---
+- name: update apt if needed
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=36000
+  tags:
+    - provision
+
+- name: install PostgreSQL
+  sudo: yes
+  apt: name=postgresql-9.3 state=present
+  tags:
+    - provision

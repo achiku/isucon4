@@ -1,0 +1,32 @@
+server {
+    ##
+    # Basic Settings
+    ##
+    listen 80;
+    server_name $hostname;
+
+    ##
+    # Cookie Settings
+    ##
+    userid          on;
+    userid_name     uid;
+    userid_path     /;
+    userid_expires  365d;
+    userid_p3p "CP='THIS IS NOT A P3P'";
+
+    ##
+    # Log Settings
+    ##
+    access_log /var/log/nginx/clo-tag.access.log ltsv;
+    error_log /var/log/nginx/clo-tag.error.log;
+    
+
+    ##
+    # Location Settings
+    ##
+    location / {
+      empty_gif;
+      expires -1;
+      break;
+    }
+}

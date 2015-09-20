@@ -1,0 +1,59 @@
+---
+- name: install openresty depndencies
+  sudo: yes
+  apt: name={{ item }} state=present
+  with_items:
+    - libpcre3-dev
+    - libssl-dev
+
+- name: download openresty
+  get_url: >
+    url=http://openresty.org/download/{{ openresty }}.tar.gz
+    dest={{ src_path }}/{{ openresty }}.tar.gz
+
+- name: extract openresty source code
+  command: > 
+    tar xfz {{ openresty }}.tar.gz
+    chdir={{ src_path }}
+    creates={{ src_path }}/{{ openresty }}
+
+- name: configure openresty
+  command: > 
+    ./configure --with-luajit -j2
+    chdir={{ src_path }}/{{ openresty }}
+    creates={{ src_path }}/{{ openresty }}/Makefile
+
+- name: make openresty
+  command: > 
+    make -j2
+    chdir={{ src_path }}/{{ openresty }}
+
+- name: make install openresty
+  sudo: yes
+  command: > 
+    make install
+    chdir={{ src_path }}/{{ openresty }}
+    creates={{ nginx_path }}
+    
+- name: create sites-{available,enabled} directory
+  sudo: yes
+  file: path={{ nginx_path }}/conf/{{ item }} owner=root group=root state=directory
+  with_items:
+    - sites-available
+    - sites-enabled
+
+- name: upload nginx.conf
+  sudo: yes
+  copy: src=./nginx.conf dest="{{ nginx_path }}/conf/nginx.conf"
+
+- name: upload nginx init script
+  sudo: yes
+  copy: src=./init.d.nginx dest=/etc/init.d/nginx mode=0755
+
+- name: add nginx to the system startup
+  sudo: yes
+  command: /usr/sbin/update-rc.d -f nginx defaults
+
+- name: restart nginx
+  sudo: yes
+  service: name=nginx state=restarted

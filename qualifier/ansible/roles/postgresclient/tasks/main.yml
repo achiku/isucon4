@@ -1,0 +1,15 @@
+---
+- name: update apt if needed
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=36000
+  tags:
+    - provision
+
+- name: install PostgreSQL client
+  sudo: yes
+  apt: name={{ item }} state=present
+  with_items:
+      - postgresql-client
+      - postgresql-server-dev-9.3
+  tags:
+    - provision

@@ -1,0 +1,13 @@
+---
+- name: set up timezone of server
+  sudo: yes
+  copy: >
+    content='Asia/Tokyo'
+    dest=/etc/timezone
+    owner=root
+    group=root
+    mode=0644
+
+- name: update timezone
+  sudo: yes
+  command: dpkg-reconfigure --frontend noninteractive tzdata

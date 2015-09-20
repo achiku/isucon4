@@ -1,0 +1,64 @@
+---
+- name: update apt if needed
+  sudo: yes
+  apt: update_cache=yes cache_valid_time=36000
+  tags:
+    - provision
+
+- name: install libs for python3
+  sudo: yes
+  apt: name={{ item }} state=present
+  with_items:
+    - libbz2-dev
+    - libreadline-dev
+    - libssl-dev
+    - libsqlite3-dev
+    - libgdbm-dev
+    - zlib1g-dev
+    - tk-dev
+    - tcl-dev
+    - liblzma-dev
+    - libncurses5-dev
+  tags:
+    - provision
+
+- name: download python3 source
+  command: > 
+      wget https://www.python.org/ftp/python/3.4.3/Python-3.4.3.tgz
+      chdir=/tmp
+      creates=/tmp/Python-3.4.3.tgz
+  tags:
+    - provision
+
+- name: uncompress python3 source
+  command: >
+      tar xvfz Python-3.4.3.tgz
+      chdir=/tmp
+      creates=/tmp/Python-3.4.3
+  tags:
+    - provision
+
+- name: configure
+  command: >
+      ./configure --prefix=/usr/local
+      chdir=/tmp/Python-3.4.3
+      creates=/tmp/Python-3.4.3/Makefile
+  tags:
+    - provision
+
+- name: make
+  command: >
+      make
+      chdir=/tmp/Python-3.4.3
+      creates=/tmp/Python-3.4.3/python
+  tags:
+    - provision
+
+- name: make install
+  sudo: yes
+  command: >
+      make install
+      chdir=/tmp/Python-3.4.3
+      creates=/usr/local/bin/python3
+  tags:
+    - provision

@@ -1,0 +1,10 @@
+---
+- name: Install ntp
+  sudo: yes
+  apt: name=ntp state=present
+
+- name: Add ntpd to the system startup
+  sudo: yes
+  service: >
+    name=ntp
+    enabled=yes

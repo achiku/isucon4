@@ -1,0 +1,40 @@
+upstream django {
+    server unix:///var/run/uwsgi.sock;
+}
+
+server {
+    ##
+    # Basic Settings
+    ##
+    listen 80;
+    server_name $hostname;
+
+    ##
+    # Log Settings
+    ##
+    access_log /var/log/nginx/af-admin.access.log ltsv;
+    error_log /var/log/nginx/af-admin.error.log;
+    
+
+    ##
+    # Location Settings
+    ##
+    location /static {
+        alias /home/ubuntu/staticfiles;
+    }
+
+    location / {
+        include /etc/nginx/conf.d/uwsgi_params;
+        uwsgi_pass django;
+    }
+
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+
+    location /healthcheck {
+        include uwsgi_params;
+        uwsgi_pass django;
+    }
+}
