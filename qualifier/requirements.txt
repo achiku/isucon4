@@ -1,4 +1,4 @@
 Flask==0.10.1
 gunicorn==19.3.0
-PyMySQL3=0.5
+PyMySQL3==0.5
 -e git+ssh://git@github.com/ansible/ansible.git@f0efe1ecb0c7c0f3966a1950bbc94e792b12d3d2#egg=ansible
