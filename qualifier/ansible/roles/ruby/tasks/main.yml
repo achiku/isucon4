@@ -1,0 +1,19 @@
+---
+- name: add ruby ppa
+  sudo: yes
+  apt_repository: repo='ppa:brightbox/ruby-ng' update_cache=yes
+
+- name: install ruby
+  sudo: yes
+  apt: name=ruby2.2 state=present
+
+- name: install ruby2.2-dev
+  sudo: yes
+  apt: name=ruby2.2-dev state=present
+
+- name: create symlink
+  sudo: yes
+  file: >
+    path=/usr/local/bin/ruby
+    src=/usr/bin/ruby2.2
+    state=link

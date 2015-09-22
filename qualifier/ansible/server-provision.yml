@@ -1,0 +1,58 @@
+---
+- name: Server Provisioning
+  hosts: server
+  user: isucon_admin
+
+  vars:
+    home_dir: /home/isucon_admin
+
+  roles:
+    - role: ../roles/common
+    - role: ../roles/python3
+    - role: ../roles/nginx
+    - role: ../roles/h2o
+    - role: ../roles/ruby
+    - role: ../roles/supervisor
+
+  tasks:
+    - name: create virtualenv
+      command: >
+        pyvenv {{ home_dir }}/venv
+        creates="{{ home_dir }}/venv"
+
+    - name: upgrade pip
+      command: >
+        {{ home_dir }}/venv/bin/pip install pip --upgrade
+
+    - name: add services
+      sudo: yes
+      command: update-rc.d -f {{ item }} defaults
+      with_items:
+        - supervisor
+      tags:
+        - app
+
+    - name: security upgrade
+      sudo: yes
+      command: unattended-upgrades
+      tags:
+        - security
+
+    - name: reboot to reflect all changes
+      sudo: yes
+      command: /sbin/shutdown -r now
+      async: 0
+      poll: 0
+      ignore_errors: true
+      tags:
+        - reboot
+
+    - name: wait for os to shut down
+      local_action: wait_for host={{ inventory_hostname }} port=22 delay=10 state=stopped
+      tags:
+        - reboot
+
+    - name: wait for SSH to come up
+      local_action: wait_for host={{ inventory_hostname }} port=22 delay=30 timeout=300 state=started
+      tags:
+        - reboot

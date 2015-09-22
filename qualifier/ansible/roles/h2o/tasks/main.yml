@@ -1,0 +1,54 @@
+---
+- name: set default version
+  set_fact:
+    version: "1.5.0-beta2"
+
+- name: install packages
+  sudo: yes
+  apt: name={{ item }} state=present
+  with_items: h2o_apt_packages
+
+- name: makedir 
+  sudo: yes
+  file: >
+    path={{ item }}
+    state=directory
+    owner=root
+    group=root
+    mode=0755
+  with_items: h2o_makedir
+
+- name: wget h2o source
+  sudo: yes
+  command: >
+    wget https://github.com/h2o/h2o/archive/v{{ version }}.tar.gz
+    chdir={{ h2o_src }}
+    creates={{ h2o_src }}/v{{ version }}.tar.gz
+
+- name: make h2o
+  sudo: yes
+  shell:
+    cd {{ h2o_src }} &&
+    tar xfz v{{ version }}.tar.gz &&
+    cd h2o-{{ version }} &&
+    cmake -DWITH_BUNDLED_SSL=on . &&
+    make &&
+    make install
+
+- name: copy h2o.conf
+  sudo: yes
+  template: >
+    src=h2o.conf
+    dest={{ h2o_conf }}
+    owner=root 
+    group=root 
+    mode=744
+
+- name: copy index.html
+  sudo: yes
+  copy: >
+    src=index.html
+    dest={{ h2o_doc }}
+    owner=root 
+    group=root 
+    mode=744
