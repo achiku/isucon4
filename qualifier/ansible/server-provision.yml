@@ -24,7 +24,13 @@
       command: >
         {{ home_dir }}/venv/bin/pip install pip --upgrade
 
-    - name: add services
+    - name: remove services controlled by upstart
+      sudo: yes
+      command: mv /etc/init/nginx.conf /etc/init/nginx.conf.disable
+      tags:
+        - app
+
+    - name: add services in sysvinit
       sudo: yes
       command: update-rc.d -f {{ item }} defaults
       with_items:
